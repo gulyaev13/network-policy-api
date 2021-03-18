@@ -1,0 +1,61 @@
+---
+#Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: policy-editor-svc
+  labels:
+    app: policy-editor
+    app.kubernetes.io/name: policy-editor
+spec:
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: policy-editor
+    app.kubernetes.io/name: policy-editor
+  type: LoadBalancer
+---
+
+#Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: policy-editor-deployment
+  labels:
+    app: policy-editor
+    app.kubernetes.io/name: policy-editor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: policy-editor
+      app.kubernetes.io/name: policy-editor
+  template:
+    metadata:
+      labels:
+        app: policy-editor
+        app.kubernetes.io/name: policy-editor
+    spec:
+      serviceAccountName: policy-editor-sa
+      automountServiceAccountToken: true
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: policy-editor
+          image: gcr.io/itmo-diploma/itmo-diploma/policy-editor:0.0.1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: rest
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 0.5
+              memory: 512Mi
+            requests:
+              cpu: 0.5
+              memory: 512Mi
